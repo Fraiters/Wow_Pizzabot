@@ -6,6 +6,7 @@ from handlers.admin_handler import AdminHandler
 from handlers.client_handler import ClientHandler
 from handlers.other_handler import OtherHandler
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from db.db import Db
 
 
 class TelegramBot:
@@ -13,13 +14,15 @@ class TelegramBot:
     bot = Bot(token=os.getenv('TOKEN'))
     storage = MemoryStorage()
     dp = Dispatcher(bot=bot, storage=storage)
+    db = Db()
 
     async def on_startup(self, _):
         print('Бот вышел в онлайн')
+        self.db.create_table_menu()
 
     def run(self):
-        admin_handler = AdminHandler(bot=self.bot)
-        client_handler = ClientHandler(bot=self.bot)
+        admin_handler = AdminHandler(bot=self.bot, db=self.db)
+        client_handler = ClientHandler(bot=self.bot, db=self.db)
         other_handler = OtherHandler()
 
         admin_handler.registration(dp=self.dp)
